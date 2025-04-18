@@ -24,4 +24,20 @@ export default class RepositoryAlunos {
   destroy = async (id: number) => {
     await db("alunos").where({ id }).del()
   }
+
+  getCursosDoAluno = async (id: number) => {
+    return db("matriculas")
+      .join("cursos", "matriculas.id_curso", "cursos.id")
+      .where("matriculas.id_aluno", id)
+      .select("cursos.*")
+  }
+
+  matricularAluno = async (id: number, cursos: number[]) => {
+    const matriculas = cursos.map((idCurso) => ({
+      id_aluno: id,
+      id_curso: idCurso
+    }))
+
+    await db("matriculas").insert(matriculas)
+  }
 }

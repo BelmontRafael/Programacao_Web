@@ -109,4 +109,41 @@ export default class ControllerAlunos {
       }
     }
   }
+
+  listarCursos = async (req: Request, res: Response) => {
+    try {
+      const cursos = await new ServiceAlunos().listarCursosDoAluno(+req.params.id)
+      res.status(200).json(cursos)
+    } catch (error) {
+      if (error instanceof Error) {
+        switch (error.name) {
+          case "idInexistente":
+            res.status(400).json({ name: error.name, msg: error.message })
+            break
+          default:
+            res.status(400).json("Ocorreu um erro inesperado com sua requisição!")
+            break
+        }
+      }
+    }
+  }
+
+  matricular = async (req: Request, res: Response) => {
+    try {
+      const { cursos } = req.body
+      await new ServiceAlunos().matricularAluno(+req.params.id, cursos)
+      res.status(201).send("Aluno matriculado com sucesso!")
+    } catch (error) {
+      if (error instanceof Error) {
+        switch (error.name) {
+          case "idInexistente":
+            res.status(400).json({ name: error.name, msg: error.message })
+            break
+          default:
+            res.status(400).json("Ocorreu um erro inesperado com sua requisição!")
+            break
+        }
+      }
+    }
+  }
 }

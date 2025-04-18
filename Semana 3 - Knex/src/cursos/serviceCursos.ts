@@ -75,4 +75,17 @@ export default class ServiceCursos {
 
     await new RepositoryCursos().destroy(id)
   }
+
+  async listarAlunosDoCurso(id: number) {
+    const curso = await new RepositoryCursos().getOne(id)
+
+    if (!curso) {
+      const erro = new Error("Curso não encontrado")
+      erro.name = "idInexistente"
+      throw erro
+    }
+
+    const alunos = await new RepositoryCursos().getAlunosDoCurso(id)
+    return alunos
+  }
 }

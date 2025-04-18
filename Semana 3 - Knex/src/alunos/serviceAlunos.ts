@@ -76,4 +76,29 @@ export default class ServiceAlunos {
 
     await new RepositoryAlunos().destroy(id)
   }
+
+  async listarCursosDoAluno(id: number) {
+    const aluno = await new RepositoryAlunos().getOne(id)
+
+    if (!aluno) {
+      const erro = new Error("Aluno não encontrado")
+      erro.name = "idInexistente"
+      throw erro
+    }
+
+    const cursos = await new RepositoryAlunos().getCursosDoAluno(id)
+    return cursos
+  }
+
+  async matricularAluno(id: number, cursos: number[]) {
+    const aluno = await new RepositoryAlunos().getOne(id)
+
+    if (!aluno) {
+      const erro = new Error("Aluno não encontrado")
+      erro.name = "idInexistente"
+      throw erro
+    }
+
+    await new RepositoryAlunos().matricularAluno(id, cursos)
+  }
 }

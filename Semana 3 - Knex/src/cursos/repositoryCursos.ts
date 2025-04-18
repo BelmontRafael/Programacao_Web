@@ -24,4 +24,11 @@ export default class RepositoryCursos {
   destroy = async (id: number) => {
     await db("cursos").where({ id }).del()
   }
+
+  getAlunosDoCurso = async (id: number) => {
+    return db("matriculas")
+      .join("alunos", "matriculas.id_aluno", "alunos.id")
+      .where("matriculas.id_curso", id)
+      .select("alunos.*")
+  }
 }
