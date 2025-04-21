@@ -1,47 +1,38 @@
-import CursoModel from "../database/models/curso"
-import AlunoModel from "../database/models/aluno"
 import { Curso } from "./curso"
+import CursoModel from "../database/models/Curso"
 
 export default class RepositoryCursos {
-  async getAll() {
-    return await CursoModel.findAll()
+  getAll = async (): Promise<Curso[]> => {
+    const cursos = await CursoModel.findAll()
+    return cursos.map((curso) => curso.get({ plain: true }))
   }
 
-  async getOne(id: number) {
-    return await CursoModel.findByPk(id)
+  getOne = async (id: number): Promise<Curso | null> => {
+    const curso = await CursoModel.findByPk(id, { include: ["alunos"] })
+    return curso ? curso.get({ plain: true }) : null
   }
 
-  async create(curso: Curso) {
-    return await CursoModel.create(curso)
-  }
-
-  async update(id: number, curso: Curso) {
-    const cursoInstance = await CursoModel.findByPk(id)
-    if (!cursoInstance) return null
-    return await cursoInstance.update(curso)
-  }
-
-  async patch(id: number, patchCurso: Partial<Curso>) {
-    const cursoInstance = await CursoModel.findByPk(id)
-    if (!cursoInstance) return null
-    return await cursoInstance.update(patchCurso)
-  }
-
-  async destroy(id: number) {
-    const cursoInstance = await CursoModel.findByPk(id)
-    if (!cursoInstance) return null
-    await cursoInstance.destroy()
-  }
-
-  async getAlunosDoCurso(id: number) {
-    const curso = await CursoModel.findByPk(id, {
-      include: [
-        {
-          model: AlunoModel,
-          through: { attributes: [] } // Exclude matriculas attributes
-        }
-      ]
+  create = async (curso: Curso): Promise<Curso> => {
+    const createdCurso = await CursoModel.create({
+      nome: curso.nome,
+      carga_horaria: curso.carga_horaria
     })
-    return curso ? curso.Alunos : []
+    return createdCurso.get({ plain: true })
+  }
+
+  update = async (id: number, curso: Curso): Promise<Curso | null> => {
+    await CursoModel.update(curso, { where: { id } })
+    const updatedCurso = await CursoModel.findByPk(id)
+    return updatedCurso ? updatedCurso.get({ plain: true }) : null
+  }
+
+  patch = async (id: number, patchCurso: Partial<Curso>): Promise<Curso | null> => {
+    await CursoModel.update(patchCurso, { where: { id } })
+    const patchedCurso = await CursoModel.findByPk(id)
+    return patchedCurso ? patchedCurso.get({ plain: true }) : null
+  }
+
+  destroy = async (id: number): Promise<void> => {
+    await CursoModel.destroy({ where: { id } })
   }
 }

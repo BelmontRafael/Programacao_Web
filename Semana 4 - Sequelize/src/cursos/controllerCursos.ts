@@ -20,24 +20,6 @@ export default class ControllerCursos {
     }
   }
 
-  listarAlunos = async (req: Request, res: Response) => {
-    try {
-      const alunos = await new ServiceCursos().listarAlunosDoCurso(+req.params.id)
-      res.status(200).json(alunos)
-    } catch (error) {
-      if (error instanceof Error) {
-        switch (error.name) {
-          case "idInexistente":
-            res.status(400).json({ name: error.name, msg: error.message })
-            break
-          default:
-            res.status(400).json("Ocorreu um erro inesperado com sua requisição!")
-            break
-        }
-      }
-    }
-  }
-
   visualizar = async (req: Request, res: Response) => {
     try {
       const curso = await new ServiceCursos().visualizarCurso(+req.params.id)

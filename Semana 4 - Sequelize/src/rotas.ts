@@ -3,6 +3,7 @@ import rotasAlunos from "./alunos/rotasAlunos"
 import rotasCursos from "./cursos/rotasCursos"
 
 const rotas = express.Router()
-rotas.use(rotasAlunos, rotasCursos)
+rotas.use(rotasAlunos)
+rotas.use(rotasCursos)
 
 export default rotas

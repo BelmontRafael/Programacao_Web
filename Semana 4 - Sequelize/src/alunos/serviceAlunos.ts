@@ -1,3 +1,4 @@
+// src/alunos/serviceAlunos.ts
 import { Aluno } from "./aluno"
 import RepositoryAlunos from "./repositoryAlunos"
 
@@ -5,6 +6,7 @@ export default class ServiceAlunos {
   async listarAlunos() {
     const alunos = await new RepositoryAlunos().getAll()
     if (!alunos || alunos.length === 0) {
+      // Changed check
       const erro = new Error("Não há alunos cadastrados!")
       erro.name = "bancoVazio"
       throw erro
@@ -26,10 +28,11 @@ export default class ServiceAlunos {
     const { nome, idade } = aluno
     if (!nome || !idade) {
       const erro = new Error("Dados incompletos, por favor preencher todas as informações do curso!")
-      erro.name = "dadosIncompletos"
+      erro.name = "dadosincompletos"
       throw erro
     }
-    return await new RepositoryAlunos().create(aluno)
+    const alunoCriado = await new RepositoryAlunos().create(aluno)
+    return alunoCriado
   }
 
   async atualizarAluno(id: number, dados: Aluno) {
@@ -39,7 +42,11 @@ export default class ServiceAlunos {
       erro.name = "idInexistente"
       throw erro
     }
-    return await new RepositoryAlunos().update(id, dados)
+    const alunoAtualizado = await new RepositoryAlunos().update(id, dados)
+    if (!alunoAtualizado) {
+      throw new Error("Aluno não encontrado")
+    }
+    return alunoAtualizado
   }
 
   async atualizarAlunoParcial(id: number, dados: Partial<Aluno>) {
@@ -49,7 +56,11 @@ export default class ServiceAlunos {
       erro.name = "idInexistente"
       throw erro
     }
-    return await new RepositoryAlunos().patch(id, dados)
+    const alunoParcialmenteAtualizado = await new RepositoryAlunos().patch(id, dados)
+    if (!alunoParcialmenteAtualizado) {
+      throw new Error("Aluno não encontrado")
+    }
+    return alunoParcialmenteAtualizado
   }
 
   async deletarAluno(id: number) {
@@ -60,25 +71,5 @@ export default class ServiceAlunos {
       throw erro
     }
     await new RepositoryAlunos().destroy(id)
-  }
-
-  async listarCursosDoAluno(id: number) {
-    const aluno = await new RepositoryAlunos().getOne(id)
-    if (!aluno) {
-      const erro = new Error("Aluno não encontrado")
-      erro.name = "idInexistente"
-      throw erro
-    }
-    return await new RepositoryAlunos().getCursosDoAluno(id)
-  }
-
-  async matricularAluno(id: number, cursos: number[]) {
-    const aluno = await new RepositoryAlunos().getOne(id)
-    if (!aluno) {
-      const erro = new Error("Aluno não encontrado")
-      erro.name = "idInexistente"
-      throw erro
-    }
-    await new RepositoryAlunos().matricularAluno(id, cursos)
   }
 }

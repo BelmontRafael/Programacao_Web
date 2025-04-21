@@ -1,50 +1,40 @@
-import { DataTypes, Model } from "sequelize"
-import sequelize from "../index"
-import Curso from "./curso"
+import {
+  Table,
+  Column,
+  Model,
+  DataType,
+  PrimaryKey,
+  AutoIncrement,
+  CreatedAt,
+  DeletedAt,
+  BelongsToMany
+} from "sequelize-typescript"
+import Matricula from "./Matricula"
+import Curso from "./Curso"
 
-interface AlunoAttributes {
-  id?: number
-  nome: string
-  idade: number
+@Table({
+  tableName: "alunos",
+  modelName: "Aluno",
+  timestamps: true
+})
+export default class Aluno extends Model {
+  @PrimaryKey
+  @AutoIncrement
+  @Column(DataType.INTEGER)
+  declare id: number
+
+  @Column(DataType.STRING)
+  declare nome: string
+
+  @Column(DataType.DATE)
+  declare idade: number
+
+  @CreatedAt
+  declare createdAt: Date
+
+  @DeletedAt
+  declare deletedAt: Date
+
+  @BelongsToMany(() => Curso, () => Matricula)
+  declare cursos?: Curso[]
 }
-
-class Aluno extends Model<AlunoAttributes> implements AlunoAttributes {
-  addCursos(cursosInstances: Curso[]) {
-      throw new Error("Method not implemented.")
-  }
-  public id!: number
-  public nome!: string
-  public idade!: number
-
-  public readonly createdAt!: Date
-  public readonly updatedAt!: Date
-    Cursos: any
-}
-
-Aluno.init(
-  {
-    id: {
-      type: DataTypes.INTEGER,
-      autoIncrement: true,
-      primaryKey: true
-    },
-    nome: {
-      type: DataTypes.STRING,
-      allowNull: false
-    },
-    idade: {
-      type: DataTypes.INTEGER,
-      allowNull: false
-    }
-  },
-  {
-    sequelize,
-    tableName: "alunos",
-    timestamps: true
-  }
-)
-
-// Define N:N relationship
-Aluno.belongsToMany(Curso, { through: "matriculas", foreignKey: "id_aluno", otherKey: "id_curso" })
-
-export default Aluno

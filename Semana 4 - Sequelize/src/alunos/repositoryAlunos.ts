@@ -1,59 +1,64 @@
-import AlunoModel from "../database/models/aluno"
-import CursoModel from "../database/models/curso"
-import MatriculaModel from "../database/models/matricula"
+// src/alunos/repositoryAlunos.ts
 import { Aluno } from "./aluno"
+import AlunoModel from "../database/models/Aluno"
 
 export default class RepositoryAlunos {
-  async getAll() {
-    return await AlunoModel.findAll()
+  getAll = async (): Promise<Aluno[]> => {
+    const alunos = await AlunoModel.findAll()
+    return alunos.map((aluno) => ({
+      id: aluno.id,
+      nome: aluno.nome,
+      idade: aluno.idade,
+      cursos: aluno.cursos
+    }))
   }
 
-  async getOne(id: number) {
-    return await AlunoModel.findByPk(id)
-  }
-
-  async create(aluno: Aluno) {
-    return await AlunoModel.create(aluno)
-  }
-
-  async update(id: number, aluno: Aluno) {
-    const alunoInstance = await AlunoModel.findByPk(id)
-    if (!alunoInstance) return null
-    return await alunoInstance.update(aluno)
-  }
-
-  async patch(id: number, patchAluno: Partial<Aluno>) {
-    const alunoInstance = await AlunoModel.findByPk(id)
-    if (!alunoInstance) return null
-    return await alunoInstance.update(patchAluno)
-  }
-
-  async destroy(id: number) {
-    const alunoInstance = await AlunoModel.findByPk(id)
-    if (!alunoInstance) return null
-    await alunoInstance.destroy()
-  }
-
-  async getCursosDoAluno(id: number) {
-    const aluno = await AlunoModel.findByPk(id, {
-      include: [
-        {
-          model: CursoModel,
-          through: { attributes: [] } // Exclude matriculas attributes
+  getOne = async (id: number): Promise<Aluno | null> => {
+    const aluno = await AlunoModel.findByPk(id, { include: ["cursos"] })
+    return aluno
+      ? {
+          id: aluno.id,
+          nome: aluno.nome,
+          idade: aluno.idade,
+          cursos: aluno.cursos
         }
-      ]
-    })
-    return aluno ? aluno.Cursos : []
+      : null
   }
 
-  async matricularAluno(id: number, cursos: number[]) {
-    const aluno = await AlunoModel.findByPk(id)
-    if (!aluno) return null
-
-    const cursosInstances = await CursoModel.findAll({
-      where: { id: cursos }
+  create = async (aluno: Aluno): Promise<Aluno> => {
+    const createdAluno = await AlunoModel.create({
+      nome: aluno.nome,
+      idade: aluno.idade
     })
 
-    await aluno.addCursos(cursosInstances)
+    if (aluno.id_cursos && aluno.id_cursos.length > 0) {
+      await createdAluno.$set(
+        "cursos",
+        aluno.id_cursos.map((curso) => curso)
+      )
+    }
+
+    return {
+      id: createdAluno.id,
+      nome: createdAluno.nome,
+      idade: createdAluno.idade,
+      cursos: aluno.cursos
+    }
+  }
+
+  update = async (id: number, aluno: Aluno): Promise<Aluno | null> => {
+    await AlunoModel.update(aluno, { where: { id } })
+    const updatedAluno = await AlunoModel.findByPk(id)
+    return updatedAluno ? updatedAluno.get({ plain: true }) : null
+  }
+
+  patch = async (id: number, patchAluno: Partial<Aluno>): Promise<Aluno | null> => {
+    await AlunoModel.update(patchAluno, { where: { id } })
+    const patchedAluno = await AlunoModel.findByPk(id)
+    return patchedAluno ? patchedAluno.get({ plain: true }) : null
+  }
+
+  destroy = async (id: number): Promise<void> => {
+    await AlunoModel.destroy({ where: { id } })
   }
 }

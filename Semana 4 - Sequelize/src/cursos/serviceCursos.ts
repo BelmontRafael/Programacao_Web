@@ -2,9 +2,10 @@ import { Curso } from "./curso"
 import RepositoryCursos from "./repositoryCursos"
 
 export default class ServiceCursos {
-  async listarCursos() {
+  listarCursos = async () => {
     const cursos = await new RepositoryCursos().getAll()
     if (!cursos || cursos.length === 0) {
+      // Changed check
       const erro = new Error("Não há cursos cadastrados!")
       erro.name = "bancoVazio"
       throw erro
@@ -12,7 +13,7 @@ export default class ServiceCursos {
     return cursos
   }
 
-  async visualizarCurso(id: number) {
+  visualizarCurso = async (id: number) => {
     const curso = await new RepositoryCursos().getOne(id)
     if (!curso) {
       const erro = new Error("Não foi encontrado curso com este Id!")
@@ -22,37 +23,46 @@ export default class ServiceCursos {
     return curso
   }
 
-  async criarCurso(curso: Curso) {
+  criarCurso = async (curso: Curso) => {
     const { nome, carga_horaria } = curso
     if (!nome || !carga_horaria) {
       const erro = new Error("Dados incompletos, por favor preencher todas as informações do curso!")
       erro.name = "dadosIncompletos"
       throw erro
     }
-    return await new RepositoryCursos().create(curso)
+    const cursoCriado = await new RepositoryCursos().create(curso)
+    return cursoCriado
   }
 
-  async atualizarCurso(id: number, curso: Curso) {
+  atualizarCurso = async (id: number, curso: Curso) => {
     const cursoExiste = await new RepositoryCursos().getOne(id)
     if (!cursoExiste) {
       const erro = new Error("Não foi encontrado curso com este Id!")
       erro.name = "idInexistente"
       throw erro
     }
-    return await new RepositoryCursos().update(id, curso)
+    const cursoAtualizado = await new RepositoryCursos().update(id, curso)
+    if (!cursoAtualizado) {
+      throw new Error("Curso não encontrado") // Or handle this differently
+    }
+    return cursoAtualizado
   }
 
-  async atualizarCursoParcial(id: number, curso: Partial<Curso>) {
+  atualizarCursoParcial = async (id: number, curso: Partial<Curso>) => {
     const cursoExiste = await new RepositoryCursos().getOne(id)
     if (!cursoExiste) {
       const erro = new Error("Não foi encontrado curso com este Id!")
       erro.name = "idInexistente"
       throw erro
     }
-    return await new RepositoryCursos().patch(id, curso)
+    const cursoAtualizado = await new RepositoryCursos().patch(id, curso)
+    if (!cursoAtualizado) {
+      throw new Error("Curso não encontrado")
+    }
+    return cursoAtualizado
   }
 
-  async deletarCurso(id: number) {
+  deletarCurso = async (id: number) => {
     const curso = await new RepositoryCursos().getOne(id)
     if (!curso) {
       const erro = new Error("Não foi encontrado curso com este Id!")
@@ -60,15 +70,5 @@ export default class ServiceCursos {
       throw erro
     }
     await new RepositoryCursos().destroy(id)
-  }
-
-  async listarAlunosDoCurso(id: number) {
-    const curso = await new RepositoryCursos().getOne(id)
-    if (!curso) {
-      const erro = new Error("Curso não encontrado")
-      erro.name = "idInexistente"
-      throw erro
-    }
-    return await new RepositoryCursos().getAlunosDoCurso(id)
   }
 }
